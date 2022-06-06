@@ -1,0 +1,163 @@
+- name: install offshore using nginx
+  hosts: all
+  become: yes
+  become_method: sudo
+  
+  tasks:
+    - name: update all packages
+      yum: name="*" state=latest
+
+    - name: Set hostname
+      hostname:
+        name: {{ inventory_hostname }}
+
+    - name: Install epel package
+      yum:
+        name:
+          - epel-release
+        state: present
+    - name: change sysctl config file
+      template:
+        src: sysctl.conf
+        dest: /etc/sysctl.conf
+        backup: yes
+    - name: install nginx
+      yum:
+        - name: nginx
+          state: present
+    - name: copy config config file
+      template:
+        src: sysctl.conf
+        dest: /etc/sysctl.conf
+        backup: yes
+    - name: start nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+    - name: add user deploy
+      user:
+        name: deploy
+        shell: /bin/bash
+        expires: -1
+    - name: create folder .ssh
+      file:
+        path: /home/deploy/.ssh
+        state: directory
+        owner: deploy
+        group: deploy
+        mode: 0700
+
+    - name: copy authorized_keys to remote host
+      template:
+        src: authorized_keys
+        dest: /home/deploy/.ssh/authorized_keys
+        owner: deploy
+        group: deploy
+        mode: 0600
+
+    - name: stop firewall
+      systemd:
+        name: firewalld
+        state: stopped
+        enabled: no
+
+    - name: install zabbix agent - copy zabbix rpm file
+      copy:
+        src: templates/zabbix-agent-3.2.9-1.el7.x86_64.rpm
+        dest: /tmp/zabbix-agent-3.2.9-1.el7.x86_64.rpm
+      tags:
+        - zabbix
+    
+    - name: install zabbix rpm file from local
+      yum:
+        name: /tmp/zabbix-agent-3.2.9-1.el7.x86_64.rpm
+        state: present
+      tags:
+        - zabbix
+    
+    - name: copy lld-disks.py
+      copy:
+        src: templates/lld-disks.py
+        dest: /usr/local/bin/lld-disks.py
+      tags:
+        - zabbix
+    
+    - name: copy userparameter_diskstats.conf
+      template:
+        src: userparameter_diskstats.conf
+        dest: /etc/zabbix/zabbix_agentd.d/userparameter_diskstats.conf
+      tags:
+        - zabbix
+    
+    - name: copy userparameter_sockstat.conf
+      template:
+        src: userparameter_sockstat.conf
+        dest: /etc/zabbix/zabbix_agentd.d/userparameter_sockstat.conf
+      tags:
+        - zabbix
+    
+    - name: get hostname to config zabbix agentd
+      shell: hostname
+      register: hst
+      tags:
+        - zabbix
+    
+    - name: config hostname zabbix agentd
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^Hostname='
+        line: Hostname={{ hst.stdout }}
+      tags:
+        - zabbix
+    
+    - name: config IP server zabbix agentd
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^Server='
+        line: Server=103.97.124.136
+      tags:
+        - zabbix
+    
+    - name: config IP ServerActive zabbix agentd
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^ServerActive='
+        line: ServerActive=103.97.124.136
+      tags:
+        - zabbix
+    
+    - name: make sure folder zabbix owner by zabbix user
+      shell: "chown zabbix: -R /etc/zabbix"
+      tags:
+        - zabbix
+    
+    - name: start zabbix agent service
+      systemd:
+        state: started
+        name: zabbix-agent
+        enabled: yes
+      tags:
+        - zabbix
+    
+    - name: check zabbix-agent is running
+      shell: netstat -nltp | grep -v grep | grep zabbix
+      register: zabbixagent
+      tags:
+        - zabbix
+    
+    - debug:
+        msg: "{{ zabbixagent.stdout_lines|list }}"
+      tags:
+        - zabbix
+
+    - name: turn off SELinux
+      lineinfile:
+        path: '/etc/sysconfig/selinux'
+        regexp: '^SELINUX='
+        line: 'SELINUX=Disabled'
+      ignore_errors: yes
+
+    - name: reboot all server
+      reboot:
+        reboot_timeout: 3600
