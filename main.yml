@@ -6,6 +6,9 @@
   tasks:
     - name: update all packages
       yum: name="*" state=latest
+      
+    - name: install net-tools
+      yum: name="net-tools" state=present
 
     - name: Set hostname
       hostname:
