@@ -9,7 +9,7 @@
 
     - name: Set hostname
       hostname:
-        name: {{ inventory_hostname }}
+        name: '{{ inventory_hostname }}'
 
     - name: Install epel package
       yum:
@@ -23,8 +23,8 @@
         backup: yes
     - name: install nginx
       yum:
-        - name: nginx
-          state: present
+        name: nginx
+        state: present
     - name: copy config config file
       template:
         src: sysctl.conf
