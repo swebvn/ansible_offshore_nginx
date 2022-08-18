@@ -9,6 +9,9 @@
       
     - name: install net-tools
       yum: name="net-tools" state=present
+      
+    - name: force disable selinux
+      shell: setnforce 0
 
     - name: Set hostname
       hostname:
