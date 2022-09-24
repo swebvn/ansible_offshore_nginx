@@ -12,9 +12,7 @@
       
     - name: force disable selinux
       shell: setnforce 0
-
-    - name: force disable selinux
-      shell: setenforce 0
+      ignore_errors: yes
 
     - name: Set hostname
       hostname:
@@ -34,10 +32,10 @@
       yum:
         name: nginx
         state: present
-    - name: copy config config file
+    - name: copy nginx config file
       template:
-        src: sysctl.conf
-        dest: /etc/sysctl.conf
+        src: nginx.conf
+        dest: /etc/nginx.conf
         backup: yes
     - name: start nginx
       systemd:
