@@ -10,6 +10,9 @@
     - name: install net-tools
       yum: name="net-tools" state=present
 
+    - name: force disable selinux
+      shell: setenforce 0
+
     - name: Set hostname
       hostname:
         name: '{{ inventory_hostname }}'

@@ -1,1 +1,1 @@
-serverA	ansible_host=1.2.3.4	ansible_ssh_pass="123456" ansible_ssh_user=root ansible_port=22
+offshore-14	ansible_host=101.99.93.227	ansible_ssh_pass="msljJ2N6Q15Q0u4MnA" ansible_ssh_user=root ansible_port=22
