@@ -1,6 +1,1 @@
-<<<<<<< HEAD
-offshore-15	ansible_host=101.99.93.175	ansible_ssh_pass="e5HsM3Faos92oVN58G" ansible_ssh_user=root ansible_port=22
-offshore-16	ansible_host=101.99.93.174	ansible_ssh_pass="F66Zr04ETNq7Xatx9p" ansible_ssh_user=root ansible_port=22
-=======
 offshore-ahihi	ansible_host=ahihi	ansible_ssh_pass="ahihi" ansible_ssh_user=root ansible_port=22
->>>>>>> 3fb58facbe1faa929f5be4ab8eb0cd0c1021cd0e
