@@ -1,1 +1,1 @@
-offshore-ahihi	ansible_host=ahihi	ansible_ssh_pass="ahihi" ansible_ssh_user=root ansible_port=22
+offshore	ansible_host=	ansible_ssh_pass= ansible_ssh_user= ansible_port=
